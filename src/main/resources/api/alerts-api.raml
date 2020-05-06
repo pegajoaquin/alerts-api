@@ -1,0 +1,49 @@
+#%RAML 1.0
+title: Alerts API
+description: Send alerts to different source systems
+version: v1
+
+uses:
+  CommonsLib: exchange_modules/6b6a44d5-4d11-4925-b55c-8205f05588da/commons-lib/1.0.3/commons-lib.raml
+
+types:
+  Channel: !include data-types/channel-data-type.raml
+  Message: !include data-types/message-data-type.raml
+  Creation-data-type:
+    type: object
+    properties:
+      code?: string
+      message: string
+      description: string
+      correlationId?: string
+    example:
+      message: Message posted
+      description: The message has been posted in the channel
+      correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+
+/systems/slack/channels:
+  get:
+    description: returns list of channels
+    displayName: GET /systems/slack/channels
+    is: [CommonsLib.client-error-codes-trait, CommonsLib.server-error-codes-trait]
+    responses:
+      200:
+        description: returns the list of channels
+        body:
+          application/json:
+            type: Channel []
+  /{channelName}/message:
+    post:
+      description: post a message in a channel
+      displayName: POST /systems/slack/channels/{channelName}/message
+      is: [CommonsLib.client-error-codes-trait, CommonsLib.server-error-codes-trait]
+      body:
+        application/json:
+          type: Message
+      responses:
+        201:
+          body:
+            application/json:
+              type: Creation-data-type
+              example: !include examples/post-message-example.raml
+              
