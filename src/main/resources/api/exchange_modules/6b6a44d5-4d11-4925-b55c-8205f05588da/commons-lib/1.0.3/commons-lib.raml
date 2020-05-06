@@ -1,0 +1,132 @@
+#%RAML 1.0 Library
+usage: Use the following commons data types and traits to define commons standards and behaviours of API
+
+types:
+  error-data-type:
+    type: object
+    properties:
+      code?: string
+      message: string
+      description: string
+      correlationId?: string
+    example:
+      message: Internal Server Error
+      description: The API was not able to connect with SFDC
+      correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+
+traits:
+  pageable:
+    queryParameters:
+      offset:
+        description: Skip over a number of elements by specifying an offset value for the query
+        type: integer
+        required: false
+        example: 20
+        default: 0
+      limit:
+        description: Limit the number of elements on the response
+        type: integer
+        required: false
+        example: 80
+        default: 10
+
+  cacheable:
+    usage: Apply this trait to any GET method that supports caching control
+    responses:
+      200:
+        headers:
+          Cache-Control:
+            type: string
+            example: private, max-age=3600000
+          Expires:
+            type: datetime
+            example: 2017-03-16T15:00:00.05Z
+
+  client-id-and-secret-enforcement-trait:
+    headers:
+      client-id:
+        description: The Client ID of the Application
+        type: string
+        example: c6VwL5qIGQAhJfmZADoR
+      client-secret:
+        description: The Client Secret of the Appliecation
+        type: string
+        example: dGfk4xKTGPcZ4MvMxpl5
+  
+  correlation-id-enforcement-trait:
+    headers:
+      x-correlation-id:
+        description: The Collelation ID (Unique/Transaction ID) to be used between a chain of API calls
+        type: string
+        required: false
+        example: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+
+  server-error-codes-trait:
+    responses: 
+      500:
+        body: 
+          application/json:
+            type: error-data-type
+            example:
+              message: Internal Server Error
+              description: The API was not be able to connect with SAP
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      501:
+        body: 
+          application/json:
+            type: error-data-type
+            example:
+              message: Not Implemented
+              description: The API does not recognize the request method and is not capable of supporting it
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+
+  client-error-codes-trait:
+    responses:
+      400:
+        body: 
+          application/json:
+            type: error-data-type
+            example:
+              message: Bad request
+              description: The input is not correct, check the documentation of this API    
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      401:
+        body:
+          application/json:
+            type: error-data-type
+            example:
+              message: Unauthorized
+              description: Invalid Client    
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      404:
+        body: 
+          application/json:
+            type: error-data-type
+            example: 
+              message: Resource not found
+              description: The resource with the ID 12 cannot be found
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      405: 
+        body: 
+          application/json:
+            type: error-data-type
+            example: 
+              message: Method not allowed
+              description: The method GET is not allowed in this resource
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      406:
+        body: 
+          application/json:
+            type: error-data-type
+            example:
+              message: Not acceptable
+              description: The resource does not accept some one of your Accept-* Headers
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
+      415: 
+        body: 
+          application/json:
+            type: error-data-type
+            example:
+              message: Unsupported media type
+              description: This API supports only application/json
+              correlationId: 8f8596f1-9506-11e9-a1c8-88e9fe85f0e4
