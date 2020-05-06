@@ -1,0 +1,9 @@
+http:
+  port: "8081"
+ 
+slack:
+  host: "slack.com"
+  port: "443"
+  protocol: "HTTPS"
+  path: "/api"
+  token: "![m8dMgruBdkmOdq/SDJY46WB3ohS+YwxoI7sZZBRCZbOIivzXBHxyeSptHt1i1UhhgSCDM8Mo3pBfV6w9/Q9MZA==]"

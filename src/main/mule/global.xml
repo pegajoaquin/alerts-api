@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="d0ffab43-2b3f-4c7c-84d9-4c54a5f2c684" file="properties/secure/alerts-api.${mule.env}.yaml" key="${mule.key}" />
+	<global-property doc:name="Global Property" doc:id="4ae143e7-8375-433c-b873-d5772d2dc586" name="mule.env" value="local" />
+	    <http:listener-config name="alerts-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${secure::http.port}" />
+    </http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="dd603ce1-0d25-44ed-b080-f0dfd0643dd5" basePath="${secure::slack.path}" >
+		<http:request-connection protocol="${secure::slack.protocol}" host="${secure::slack.host}" port="${secure::slack.port}" />
+	</http:request-config>
+</mule>

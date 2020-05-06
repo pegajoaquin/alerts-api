@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-channels-operation-flow" doc:id="0f4fe42b-2846-46af-aacb-d3576e93eef4" >
+		<http:request method="GET" doc:name="GET conversations.list" doc:id="d1dc8e26-cc3e-4c0c-898a-82e635dec84c" config-ref="HTTP_Request_configuration" path="/conversations.list">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"token" : p('secure::slack.token')
+}]]]></http:query-params>
+		</http:request>
+		<choice doc:name="Choice" doc:id="e625d834-b58c-4dfe-8a30-0078a91a44ef" >
+			<when expression='#[payload.ok != true]'>
+				<raise-error doc:name="Raise error" doc:id="f6495ec2-da10-44f1-80df-07b9c890e890" type="CUSTOM:GETCONVERSATIONS" description="#[payload.error]"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="map get channels response" doc:id="24db8a80-706a-4748-9a71-fd829ad4dd64">
+			<ee:message>
+				<ee:set-payload resource="dw/transformations/map-get-channels-response.dwl" />
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

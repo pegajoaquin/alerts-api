@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="post-message-operation-flow" doc:id="a29e77b1-865c-477e-9b0e-45d87b01c249" >
+		<set-variable value="#[payload.text]" doc:name="Set text variable" doc:id="54dc8236-ad96-4903-a534-91aa93727393" variableName="text"/>
+		<set-variable value="#[attributes.uriParams.'channelName']" doc:name="Set channelName variable" doc:id="d8f98128-40a1-41bb-8575-673f1aff28b4" variableName="channelName"/>
+		<flow-ref doc:name="get-channels-operation-flow" doc:id="99bb40e0-6c24-4d24-bffa-d7dd8ca23ad2" name="get-channels-operation-flow"/>
+		<set-variable value="#[output application/java
+---
+(payload filter (item, index) -&gt; (item.name == vars.channelName)).id[0]]" doc:name="Set channelId variable" doc:id="664425da-c3e4-4aa9-981a-ede6bf63f0f4" variableName="channelId"/>
+		<http:request method="POST" doc:name="POST chat.postMessage" doc:id="515bdb80-ed33-49ad-a91d-829cd43df6e3" config-ref="HTTP_Request_configuration" path="/chat.postMessage">
+			<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+  "channel": vars.channelId,
+  "text": vars.text
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ p('secure::slack.token'),
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+		<choice doc:name="Choice" doc:id="093e51c3-10f1-475b-b1fb-723ca49e0c49" >
+			<when expression="#[payload.ok != true]">
+				<raise-error doc:name="Raise error" doc:id="f7029661-8ea6-401a-bb29-661743afb878" type="CUSTOM:CHATPOSTMESSAGE" description="#[payload.error]"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="7f745316-78d4-436c-bc6f-7976c15422a1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Message posted",
+  description: "The message has been posted in the channel",
+  correlationId: correlationId
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
